@@ -2,9 +2,10 @@ from typing import Optional
 
 import torch
 from ml4gw.utils.slicing import sample_kernels
-
 from train import augmentations as aug
 from train.data.base import BaseAframeDataset
+
+from .gwanalyzer import GWAnalyzer
 
 
 class SupervisedAframeDataset(BaseAframeDataset):
@@ -78,5 +79,13 @@ class SupervisedAframeDataset(BaseAframeDataset):
         mask[idx[mute_indices]] = 0
         y = torch.zeros((X.size(0), 1), device=X.device)
         y[mask] += 1
+        detector1 = X[:, 0, :]
+        detector2 = X[:, 1, :]
+        gwana = GWAnalyzer(detector1)
+        gwana.obtain_topological_features(True, True)
+        features1 = gwana.topological_features
+        gwana = GWAnalyzer(detector2)
+        gwana.obtain_topological_features(True, True)
+        features2 = gwana.topological_features
 
         return X, y, psds
