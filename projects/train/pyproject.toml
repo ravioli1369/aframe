@@ -30,6 +30,11 @@ dependencies = [
     "filelock>=3.13.1,<4",
     "s3fs>=2024,<2025",
     "lightray>=0.2.3",
+    "gudhi",
+    "librosa",
+    "giotto-tda",
+    "tqdm",
+    "scikit-learn",
 ]
 
 [project.scripts]
