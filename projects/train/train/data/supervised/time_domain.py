@@ -2,6 +2,8 @@ import torch
 
 from train.data.supervised.supervised import SupervisedAframeDataset
 
+from .gwanalyzer import GWAnalyzer
+
 
 class TimeDomainSupervisedAframeDataset(SupervisedAframeDataset):
     def build_val_batches(self, background, signals):
@@ -19,4 +21,13 @@ class TimeDomainSupervisedAframeDataset(SupervisedAframeDataset):
     def augment(self, X, waveforms):
         X, y, psds = super().augment(X, waveforms)
         X = self.whitener(X, psds)
+        detector1 = X[:, 0, :]
+        detector2 = X[:, 1, :]
+        gwana = GWAnalyzer(detector1.cpu().numpy())
+        gwana.obtain_topological_features(True, True)
+        features1 = torch.tensor(gwana.topological_features, device=X.device)
+        gwana = GWAnalyzer(detector2.cpu().numpy())
+        gwana.obtain_topological_features(True, True)
+        features2 = torch.tensor(gwana.topological_features, device=X.device)
+        X = torch.stack([features1, features2], dim=1)
         return X, y

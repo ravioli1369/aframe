@@ -6,8 +6,6 @@ from ml4gw.utils.slicing import sample_kernels
 from train import augmentations as aug
 from train.data.base import BaseAframeDataset
 
-from .gwanalyzer import GWAnalyzer
-
 
 class SupervisedAframeDataset(BaseAframeDataset):
     def __init__(
@@ -80,13 +78,4 @@ class SupervisedAframeDataset(BaseAframeDataset):
         mask[idx[mute_indices]] = 0
         y = torch.zeros((X.size(0), 1), device=X.device)
         y[mask] += 1
-        detector1 = X[:, 0, :]
-        detector2 = X[:, 1, :]
-        gwana = GWAnalyzer(detector1.cpu().numpy())
-        gwana.obtain_topological_features(True, True)
-        features1 = torch.tensor(gwana.topological_features, device=X.device)
-        gwana = GWAnalyzer(detector2.cpu().numpy())
-        gwana.obtain_topological_features(True, True)
-        features2 = torch.tensor(gwana.topological_features, device=X.device)
-        X = torch.stack([features1, features2], dim=1)
         return X, y, psds
