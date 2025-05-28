@@ -34,4 +34,5 @@ class TimeDomainSupervisedAframeDataset(SupervisedAframeDataset):
     def augment(self, X, waveforms):
         X, y, psds = super().augment(X, waveforms)
         X = self.whitener(X, psds)
+        X = self.topological_transform(X)
         return X, y
