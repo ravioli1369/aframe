@@ -6,7 +6,7 @@ from .gwanalyzer import GWAnalyzer
 
 
 class TimeDomainSupervisedAframeDataset(SupervisedAframeDataset):
-    def topological_transform(X):
+    def topological_transform(self, X):
         detector1 = X[:, 0, :]
         detector2 = X[:, 1, :]
         gwana = GWAnalyzer(detector1.cpu().numpy())
