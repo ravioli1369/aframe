@@ -37,10 +37,10 @@ class SupervisedMLP(SupervisedArchitecture):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.input_dim = input_dim
+        self.input_dim = input_dim * num_ifos
 
         def block(in_feat, out_feat, normalize=True):
-            layers = [torch.nn.Linear(in_feat, out_feat)]
+            layers = [torch.nn.Linear(in_feat, out_feat, dtype=torch.float32)]
             if normalize:
                 layers.append(torch.nn.BatchNorm1d(num_features=out_feat))
             layers.append(torch.nn.LeakyReLU())
@@ -48,18 +48,20 @@ class SupervisedMLP(SupervisedArchitecture):
             return layers
 
         self.fcblock = torch.nn.Sequential(
-            *block(input_dim, layer_widths[0]),
+            *block(self.input_dim, layer_widths[0]),
             *[
                 layers
                 for i in range(len(layer_widths) - 1)
                 for layers in block(layer_widths[i], layer_widths[i + 1])
             ],
-            torch.nn.Linear(layer_widths[-1], embed_dim),
+            torch.nn.Linear(layer_widths[-1], embed_dim, dtype=torch.float32),
         )
 
     def forward(self, src):
-        output = src.reshape(-1, self.input_dim)
-        output = self.fcblock(output)
+        batch_size = src.shape[0]
+        # Reshape to combine n_ifos and input_dims
+        output = src.reshape(batch_size, -1)
+        output = self.fcblock(output.float())
         return output
 
 
